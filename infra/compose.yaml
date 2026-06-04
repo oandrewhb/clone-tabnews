@@ -1,0 +1,7 @@
+services:
+  banco_de_dados:
+    image: 'postgres:16.0-alpine3.18'
+    environment:
+      POSTGRES_PASSWORD: 'senha_forte'
+    ports:
+      - "5432:5432"
