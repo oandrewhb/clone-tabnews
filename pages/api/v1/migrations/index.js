@@ -2,38 +2,63 @@ import migrationRunner from "node-pg-migrate";
 import { join } from "node:path";
 import database from "infra/database.js";
 
+const OK = 200;
+const CREATED = 201;
+const METHOD_NOT_ALLOWED = 405;
+const INTERNAL_SERVER_ERROR = 500;
+
 export default async function migrations(request, response) {
-  const dbClient = database.getNewConnectedClient();
-
-  const defaultMigrationOptions = {
-    dbClient: dbClient,
-    dryRun: true,
-    dir: join("infra", "migrations"),
-    direction: "up",
-    verbose: true,
-    migrationsTable: "pgmigrations",
-  };
-
-  if (request.method === "GET") {
-    const pendingMigrations = await migrationRunner({
-      ...defaultMigrationOptions,
-    });
-    await dbClient.end();
-    return response.status(200).json(pendingMigrations);
-  }
-
-  if (request.method === "POST") {
-    const executedMigrations = await migrationRunner({
-      ...defaultMigrationOptions,
-      dryRun: false,
-    });
-    await dbClient.end();
-
-    if (executedMigrations.length) {
-      return response.status(201).json(executedMigrations);
+  try {
+    if (request.method === "GET") {
+      const pendingMigrations = await dryRunMigrations();
+      return response.status(OK).json(pendingMigrations);
     }
-    return response.status(200).json(executedMigrations);
-  }
 
-  return response.status(405).end();
+    if (request.method === "POST") {
+      const executedMigrations = await liveRunMigrations();
+      const statusCode = executedMigrations.length ? CREATED : OK;
+      return response.status(statusCode).json(executedMigrations);
+    }
+
+    return response.status(METHOD_NOT_ALLOWED).end();
+  } catch (e) {
+    return response.status(INTERNAL_SERVER_ERROR).end();
+  }
+}
+
+async function dryRunMigrations() {
+  return await runMigrations({ dryRun: true });
+}
+
+async function liveRunMigrations() {
+  return await runMigrations({ dryRun: false });
+}
+
+async function runMigrations(options = {}) {
+  let dbClient;
+
+  try {
+    dbClient = database.getNewConnectedClient();
+
+    const defaultMigrationOptions = {
+      dbClient: dbClient,
+      dryRun: true,
+      dir: join("infra", "migrations"),
+      direction: "up",
+      verbose: true,
+      migrationsTable: "pgmigrations",
+    };
+
+    return await migrationRunner({
+      ...defaultMigrationOptions,
+      ...options,
+    });
+  } catch (e) {
+    console.error(e);
+    throw e;
+  } finally {
+    if (dbClient) {
+      await dbClient.end();
+    }
+  }
 }

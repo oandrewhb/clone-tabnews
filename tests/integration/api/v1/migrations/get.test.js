@@ -6,7 +6,7 @@ async function cleanDatabase() {
   await database.query("drop schema public cascade; create schema public;");
 }
 
-test("GET to api/v1/migrations should return pending migrations and status code 200 ", async () => {
+test("GET to api/v1/migrations should return pending migrations and status code 200", async () => {
   // obtém as migrations pela primeira vez, sem rodar
   const firstResponse = await fetchGetMigrations();
   const firstResponseBody = await firstResponse.json();
