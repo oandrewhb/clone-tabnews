@@ -6,23 +6,27 @@ async function cleanDatabase() {
   await database.query("drop schema public cascade; create schema public;");
 }
 
-test("DELETE to api/v1/migrations should return status code 405 with empty body and no opened connections", async () => {
+test("DELETE to api/v1/migrations should return status code 405 with error body and no opened connections", async () => {
   const response = await fetchMigrationsWithMethod("DELETE");
   expect(response.status).toBe(405);
 
-  const responseBody = await response.text();
-  expect(responseBody).toBe("");
+  const responseBody = await response.json();
+  expect(JSON.stringify(responseBody)).toBe(
+    JSON.stringify({ error: "Method DELETE not allowed" }),
+  );
 
   const openedConections = await getOpenedConnections();
   expect(openedConections).toBe(1);
 });
 
-test("PUT to api/v1/migrations should return status code 405 with empty body and no opened connections", async () => {
+test("PUT to api/v1/migrations should return status code 405 with error body and no opened connections", async () => {
   const response = await fetchMigrationsWithMethod("PUT");
   expect(response.status).toBe(405);
 
-  const responseBody = await response.text();
-  expect(responseBody).toBe("");
+  const responseBody = await response.json();
+  expect(JSON.stringify(responseBody)).toBe(
+    JSON.stringify({ error: "Method PUT not allowed" }),
+  );
 
   const openedConections = await getOpenedConnections();
   expect(openedConections).toBe(1);
