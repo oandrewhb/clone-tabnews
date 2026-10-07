@@ -1,10 +1,10 @@
 import database from "infra/database";
+import orchestrator from "tests/orchestrator";
 
-beforeAll(cleanDatabase);
-
-async function cleanDatabase() {
+beforeAll(async () => {
+  await orchestrator.waitForAllServices();
   await database.query("drop schema public cascade; create schema public;");
-}
+});
 
 test("DELETE to api/v1/migrations should return status code 405 with error body and no opened connections", async () => {
   const response = await fetchMigrationsWithMethod("DELETE");
