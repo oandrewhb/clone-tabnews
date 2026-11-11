@@ -23,7 +23,7 @@ export default async function migrations(request, response) {
     return response
       .status(METHOD_NOT_ALLOWED)
       .json({ error: `Method ${request.method} not allowed` });
-  } catch (e) {
+  } catch {
     return response
       .status(INTERNAL_SERVER_ERROR)
       .json({ error: "Internal server error" });
