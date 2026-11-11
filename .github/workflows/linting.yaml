@@ -1,8 +1,8 @@
 name: Linting
 on: pull_request
 jobs:
-  prettier:
-    name: Prettier
+  style:
+    name: Style (Prettier)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -10,9 +10,9 @@ jobs:
         with:
           node-version: lts/hydrogen
       - run: npm ci
-      - run: npm run lint:prettier:check
-  eslint:
-    name: ESLint
+      - run: npm run lint:style:check
+  quality:
+    name: Quality (ESLint)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,4 +20,4 @@ jobs:
         with:
           node-version: lts/hydrogen
       - run: npm ci
-      - run: npm run lint:eslint:check
+      - run: npm run lint:quality:check
