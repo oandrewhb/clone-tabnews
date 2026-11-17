@@ -31,6 +31,13 @@ function getNewConnectedClient() {
   return client;
 }
 
+const database = {
+  query,
+  getNewConnectedClient,
+};
+
+export default database;
+
 function getSSLValues() {
   if (process.env.POSTGRES_CA) {
     return {
@@ -41,8 +48,3 @@ function getSSLValues() {
   const noSslEnvironments = ["development", "test"];
   return noSslEnvironments.includes(process.env.NODE_ENV) ? false : true;
 }
-
-export default {
-  query,
-  getNewConnectedClient,
-};
